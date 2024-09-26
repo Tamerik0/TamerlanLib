@@ -10,7 +10,6 @@ import org.tamerlan.tamerlanlib.gui.area.RectArea;
 import org.tamerlan.tamerlanlib.gui.area.TransformedArea;
 import org.tamerlan.tamerlanlib.input.Mouse;
 
-import java.util.Base64;
 import java.util.function.Supplier;
 
 public class BaseGUIElement implements IRenderable, GUIContainerProvider, InputHandlerProvider, IAreaProvider, IRemovable {
@@ -21,8 +20,8 @@ public class BaseGUIElement implements IRenderable, GUIContainerProvider, InputH
     public final EventHandler<MouseEvents.MouseEvent> mouseClickedOnElementEvent = new EventHandler<>();
     public final EventHandler<MouseEvents.MouseEvent> mouseReleasedFromElementEvent = new EventHandler<>();
 
-    public final EventHandler<IEvent.COMMON_EVENT> mouseEnteredAreaEvent = new EventHandler<>();
-    public final EventHandler<IEvent.COMMON_EVENT> mouseExitAreaEvent = new EventHandler<>();
+    public final EventHandler<IEvent.CommonEvent> mouseEnteredAreaEvent = new EventHandler<>();
+    public final EventHandler<IEvent.CommonEvent> mouseExitAreaEvent = new EventHandler<>();
 
     public InheritableTransform2D localTransform = new InheritableTransform2D(null);
     public IGUIArea localArea = new RectArea(0, 0, 100, 100);
@@ -102,8 +101,8 @@ public class BaseGUIElement implements IRenderable, GUIContainerProvider, InputH
         var underCursorNow = getArea().isInsideArea(mousePos);
         if (underCursor != underCursorNow) {
             if (underCursor = underCursorNow)
-                mouseEnteredAreaEvent.listenEvent(new IEvent.COMMON_EVENT());
-            else mouseExitAreaEvent.listenEvent(new IEvent.COMMON_EVENT());
+                mouseEnteredAreaEvent.listenEvent(new IEvent.CommonEvent());
+            else mouseExitAreaEvent.listenEvent(new IEvent.CommonEvent());
         }
         container.render(context);
     }

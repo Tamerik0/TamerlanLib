@@ -22,7 +22,7 @@ public interface IEvent {
             return Objects.hashCode(id);
         }
     }
-    class COMMON_EVENT implements IEvent{
+    class CommonEvent implements IEvent{
         public static final EventType type = new EventType();
 
         @Override
