@@ -14,7 +14,7 @@ public class KeyboardEvents {
             type = new IEvent.EventType();
         }
     }
-    static class KeyEvent implements IEvent{
+    public static class KeyEvent implements IEvent{
         public final EventType eventType;
         public final int key;
         public final int scancode;
@@ -33,11 +33,11 @@ public class KeyboardEvents {
             return eventType;
         }
     }
-    static class CharEvent implements IEvent{
+    public static class CharEvent implements IEvent{
         public final char character;
         public final int modifiers;
 
-        CharEvent(char character, int modifiers) {
+        public CharEvent(char character, int modifiers) {
             this.character = character;
             this.modifiers = modifiers;
         }

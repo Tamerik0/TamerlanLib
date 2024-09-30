@@ -1,7 +1,7 @@
 package org.tamerlan.tamerlanlib.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.phys.Vec2;
+import org.joml.Vector2d;
 
 public class DynamicRenderableFromStatic implements IDynamicRenderable{
     IRenderable base;
@@ -9,7 +9,7 @@ public class DynamicRenderableFromStatic implements IDynamicRenderable{
         this.base = base;
     }
     @Override
-    public void renderAtPosition(GuiGraphics context, Vec2 pos) {
+    public void renderAtPosition(GuiGraphics context, Vector2d pos) {
         new TransformedElement(base).translate(pos).render(context);
     }
 
@@ -19,7 +19,7 @@ public class DynamicRenderableFromStatic implements IDynamicRenderable{
     }
 
     @Override
-    public void renderWithScale(GuiGraphics context, Vec2 scale) {
+    public void renderWithScale(GuiGraphics context, Vector2d scale) {
         new TransformedElement(base).scale(scale).render(context);
     }
 

@@ -2,9 +2,9 @@ package org.tamerlan.tamerlanlib.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.phys.Vec2;
 import org.joml.AxisAngle4d;
 import org.joml.Quaternionf;
+import org.joml.Vector2d;
 import org.joml.Vector3d;
 
 public class TransformableRenderable implements IRenderable {
@@ -27,12 +27,12 @@ public class TransformableRenderable implements IRenderable {
         this.transform = new Transform2D(other.transform);
     }
 
-    public TransformableRenderable translate(Vec2 dir) {
+    public TransformableRenderable translate(Vector2d dir) {
         transform.translate(dir);
         return this;
     }
 
-    public TransformableRenderable translated(Vec2 dir) {
+    public TransformableRenderable translated(Vector2d dir) {
         return new TransformableRenderable(this).translate(dir);
     }
 
@@ -45,12 +45,12 @@ public class TransformableRenderable implements IRenderable {
         return new TransformableRenderable(this).setZ(z);
     }
 
-    public TransformableRenderable scale(Vec2 scale) {
+    public TransformableRenderable scale(Vector2d scale) {
         transform.scale(scale);
         return this;
     }
 
-    public TransformableRenderable scaled(Vec2 scale) {
+    public TransformableRenderable scaled(Vector2d scale) {
         return new TransformableRenderable(this).scale(scale);
     }
 
@@ -67,7 +67,7 @@ public class TransformableRenderable implements IRenderable {
     public void render(GuiGraphics context) {
         PoseStack matrices = context.pose();
         matrices.pushPose();
-        matrices.scale(transform.scale.x, transform.scale.y, 1);
+        matrices.scale((float) transform.scale.x, (float) transform.scale.y, 1);
         matrices.mulPose(new Quaternionf(new AxisAngle4d(transform.rotation, new Vector3d(0, 0, 1))));
         matrices.translate(transform.pos.x, transform.pos.y, transform.zOffset);
         widget.render(context);

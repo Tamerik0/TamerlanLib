@@ -8,6 +8,7 @@ public class MouseEventDispatcher extends EventDispatcher {
         addHandler(MouseEvents.MouseEventType.CLICK.type, new EventHandler<MouseEvents.MouseEvent>());
         addHandler(MouseEvents.MouseEventType.RELEASE.type, new EventHandler<MouseEvents.MouseEvent>());
         addHandler(MouseEvents.MouseEventType.SCROLL.type, new EventHandler<MouseEvents.MouseScrollEvent>());
+        addHandler(MouseEvents.MouseEventType.POS.type, new EventHandler<MouseEvents.MouseDragEvent>());
     }
     @Override
     protected List<IEvent> dispatchEvent(IEvent event) {

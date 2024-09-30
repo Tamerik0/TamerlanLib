@@ -1,8 +1,8 @@
 package org.tamerlan.tamerlanlib.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.phys.Vec2;
+import org.joml.Vector2d;
 
 public interface IRenderableWithPosition {
-    void renderAtPosition(GuiGraphics context, Vec2 pos);
+    void renderAtPosition(GuiGraphics context, Vector2d pos);
 }

@@ -1,8 +1,7 @@
 package org.tamerlan.tamerlanlib.gui.area;
 
-
-import net.minecraft.world.phys.Vec2;
+import org.joml.Vector2d;
 
 public interface IGUIArea {
-    boolean isInsideArea(Vec2 pos);
+    boolean isInsideArea(Vector2d pos);
 }

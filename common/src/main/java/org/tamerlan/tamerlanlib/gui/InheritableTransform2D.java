@@ -1,5 +1,7 @@
 package org.tamerlan.tamerlanlib.gui;
 
+import org.joml.Matrix4d;
+
 public class InheritableTransform2D extends Transform2D {
     Transform2D parent;
 
@@ -14,11 +16,11 @@ public class InheritableTransform2D extends Transform2D {
         this.parent = parent;
     }
 
-    public Transform2D getGlobalTransform() {
+    public Matrix4d getGlobalTransform() {
         if (parent == null)
-            return new Transform2D(this);
+            return toMatrix();
         if(parent instanceof InheritableTransform2D transform)
-            return transform.getGlobalTransform().apply(this);
+            return transform.getGlobalTransform().mul(toMatrix());
         else
             return parent.apply(this);
     }

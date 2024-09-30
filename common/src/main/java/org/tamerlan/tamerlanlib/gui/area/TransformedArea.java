@@ -1,19 +1,21 @@
 package org.tamerlan.tamerlanlib.gui.area;
 
-import net.minecraft.world.phys.Vec2;
-import org.tamerlan.tamerlanlib.gui.Transform2D;
+import org.joml.Matrix4d;
+import org.joml.Vector2d;
+import org.joml.Vector4d;
+import org.tamerlan.tamerlanlib.util.MathUtils;
 
 public class TransformedArea implements IGUIArea {
-    public Transform2D transform;
+    public Matrix4d transform;
     public IGUIArea area;
 
-    public TransformedArea(Transform2D transform, IGUIArea area) {
+    public TransformedArea(Matrix4d transform, IGUIArea area) {
         this.transform = transform;
         this.area = area;
     }
 
     @Override
-    public boolean isInsideArea(Vec2 pos) {
-        return area.isInsideArea(transform.applyReverse(new Transform2D(pos)).pos);
+    public boolean isInsideArea(Vector2d pos) {
+        return area.isInsideArea(MathUtils.toVector2d(transform.invert().transform(new Vector4d(pos, 0, 1))));
     }
 }

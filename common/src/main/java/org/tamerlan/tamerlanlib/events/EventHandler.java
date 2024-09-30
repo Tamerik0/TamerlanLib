@@ -9,8 +9,12 @@ import java.util.Set;
 public class EventHandler<T extends IEvent> extends ContainerClass<EventListener<T>, Set<EventListener<T>>> implements EventListener<T> {
     Set<EventListener<T>> listeners = new HashSet<>();
 
-    public <V extends EventListener<T>> V addListener(V listener) {
-        return (V) _addElement(listener);
+    public EventListener<T> addListener(EventListener<T> listener) {
+        return _addElement(listener);
+    }
+    public EventHandlerProvider<T> addListener(EventHandlerProvider<T> listener) {
+        _addElement(listener.getEventHandler());
+        return listener;
     }
 
     public <V extends EventListener<T>> V removeListener(V listener) {

@@ -2,8 +2,8 @@ package org.tamerlan.tamerlanlib.gui;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.tamerlan.tamerlanlib.events.InputHandler;
-import org.tamerlan.tamerlanlib.events.InputHandlerProvider;
+import org.tamerlan.tamerlanlib.events.EventHandler;
+import org.tamerlan.tamerlanlib.events.EventHandlerProvider;
 
 import java.util.HashMap;
 
@@ -11,7 +11,7 @@ public abstract class GUILoader<T> {
     static HashMap<String, GUILoader> loaders;
 
     protected ChildLoader getChildLoader(T obj) {
-        if (obj instanceof GUIContainerProvider || obj instanceof InputHandlerProvider) {
+        if (obj instanceof GUIContainerProvider || obj instanceof EventHandlerProvider) {
             return new DefaultChildLoader(obj);
         }
         return null;
@@ -23,12 +23,12 @@ public abstract class GUILoader<T> {
 
     static class DefaultChildLoader implements ChildLoader {
         GUIContainer container;
-        InputHandler inputHandler;
+        EventHandler inputHandler;
         public DefaultChildLoader(Object obj) {
             if(obj instanceof GUIContainerProvider castedObj)
                 container = castedObj.getContainer();
-            if(obj instanceof InputHandlerProvider castedObj)
-                inputHandler = castedObj.getInputHandler();
+            if(obj instanceof EventHandlerProvider castedObj)
+                inputHandler = castedObj.getEventHandler();
         }
 
         @Override
@@ -39,9 +39,9 @@ public abstract class GUILoader<T> {
                     container.addRenderable(castedObj);
             }
             if(inputHandler != null){
-                if(obj instanceof InputHandler castedObj)
+                if(obj instanceof EventHandler castedObj)
                     inputHandler.addListener(castedObj);
-                if(obj instanceof InputHandlerProvider castedObj)
+                if(obj instanceof EventHandlerProvider castedObj)
                     inputHandler.addListener(castedObj);
             }
         }

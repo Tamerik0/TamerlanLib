@@ -1,21 +1,22 @@
 package org.tamerlan.tamerlanlib.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.phys.Vec2;
+import net.minecraft.client.gui.components.AbstractWidget;
+import org.joml.Vector2d;
 import org.tamerlan.tamerlanlib.core.IRemovable;
 import org.tamerlan.tamerlanlib.events.*;
+import org.tamerlan.tamerlanlib.gui.adapters.GUIElementAdapter;
 import org.tamerlan.tamerlanlib.gui.area.IAreaProvider;
 import org.tamerlan.tamerlanlib.gui.area.IGUIArea;
 import org.tamerlan.tamerlanlib.gui.area.RectArea;
 import org.tamerlan.tamerlanlib.gui.area.TransformedArea;
-import org.tamerlan.tamerlanlib.input.Mouse;
+import org.tamerlan.tamerlanlib.input.AbstractMouse;
+import org.tamerlan.tamerlanlib.input.ScreenMouse;
 
-import java.util.function.Supplier;
-
-public class BaseGUIElement implements IRenderable, GUIContainerProvider, InputHandlerProvider, IAreaProvider, IRemovable {
+public class BaseGUIElement implements IRenderable, GUIContainerProvider, EventHandlerProvider<IEvent>, IAreaProvider, IRemovable {
     public final GUIContainer container = new GUIContainer();
-    public final InputHandler inputHandler = new InputHandler();
-    public Supplier<Vec2> cursorPosSupplier = Mouse::getMouseScreenPos;
+    public final EventHandler<IEvent> eventHandler = new EventHandler<>();
+    public AbstractMouse mouse = ScreenMouse.instance;
 
     public final EventHandler<MouseEvents.MouseEvent> mouseClickedOnElementEvent = new EventHandler<>();
     public final EventHandler<MouseEvents.MouseEvent> mouseReleasedFromElementEvent = new EventHandler<>();
@@ -23,30 +24,30 @@ public class BaseGUIElement implements IRenderable, GUIContainerProvider, InputH
     public final EventHandler<IEvent.CommonEvent> mouseEnteredAreaEvent = new EventHandler<>();
     public final EventHandler<IEvent.CommonEvent> mouseExitAreaEvent = new EventHandler<>();
 
-    public InheritableTransform2D localTransform = new InheritableTransform2D(null);
+    public InheritableTransform2D transform = new InheritableTransform2D(null);
     public IGUIArea localArea = new RectArea(0, 0, 100, 100);
 
     BaseGUIElement parent;
     boolean underCursor;
 
     public BaseGUIElement() {
-        inputHandler.mouseEventDispatcher.addListener(MouseEvents.MouseEventType.CLICK.type, (MouseEvents.MouseEvent event) -> {
+        mouse.events.addListener(MouseEvents.MouseEventType.CLICK.type, (MouseEvents.MouseEvent event) -> {
             if (underCursor) mouseClickedOnElementEvent.listenEvent(event);
         });
-        inputHandler.mouseEventDispatcher.addListener(MouseEvents.MouseEventType.RELEASE.type, (MouseEvents.MouseEvent event) -> {
+        mouse.events.addListener(MouseEvents.MouseEventType.RELEASE.type, (MouseEvents.MouseEvent event) -> {
             if (underCursor) mouseReleasedFromElementEvent.listenEvent(event);
         });
     }
 
-    public BaseGUIElement(Vec2 pos) {
-        localTransform.pos = pos;
+    public BaseGUIElement(Vector2d pos) {
+        transform.pos = pos;
     }
 
     public BaseGUIElement(BaseGUIElement parent) {
         setParent(parent);
     }
 
-    public BaseGUIElement(BaseGUIElement parent, Vec2 pos) {
+    public BaseGUIElement(BaseGUIElement parent, Vector2d pos) {
         this(pos);
         setParent(parent);
     }
@@ -61,9 +62,16 @@ public class BaseGUIElement implements IRenderable, GUIContainerProvider, InputH
         return child;
     }
 
-    public <T extends InputHandlerProvider> T addChild(T child) {
-        inputHandler.addListener(child.getInputHandler());
-        return child;
+    public GUIElementAdapter addChild(AbstractWidget widget) {
+        return addChild(new GUIElementAdapter(widget));
+    }
+
+    public <T extends EventHandlerProvider<IEvent>> T addChild(T child) {
+        return (T) eventHandler.addListener(child);
+    }
+
+    public <T extends EventListener<IEvent>> T addChild(T child) {
+        return (T) eventHandler.addListener(child);
     }
 
     public BaseGUIElement getParent() {
@@ -75,15 +83,15 @@ public class BaseGUIElement implements IRenderable, GUIContainerProvider, InputH
             this.parent = null;
             return;
         }
-        var oldTransform = localTransform;
-        localTransform = new InheritableTransform2D(parent.localTransform);
-        localTransform.pos = oldTransform.pos;
-        localTransform.scale = oldTransform.scale;
-        localTransform.zOffset = oldTransform.zOffset;
-        localTransform.rotation = oldTransform.rotation;
+        var oldTransform = transform;
+        transform = new InheritableTransform2D(parent.transform);
+        transform.pos = oldTransform.pos;
+        transform.scale = oldTransform.scale;
+        transform.zOffset = oldTransform.zOffset;
+        transform.rotation = oldTransform.rotation;
         this.parent = parent;
         parent.container.addRenderable(this);
-        parent.inputHandler.addListener(inputHandler);
+        parent.eventHandler.addListener(this);
     }
 
     @Override
@@ -91,13 +99,8 @@ public class BaseGUIElement implements IRenderable, GUIContainerProvider, InputH
         return container;
     }
 
-    @Override
-    public InputHandler getInputHandler() {
-        return inputHandler;
-    }
-
     public void renderWithoutTransform(GuiGraphics context) {
-        var mousePos = cursorPosSupplier.get();
+        var mousePos = mouse.getPos();
         var underCursorNow = getArea().isInsideArea(mousePos);
         if (underCursor != underCursorNow) {
             if (underCursor = underCursorNow)
@@ -107,43 +110,42 @@ public class BaseGUIElement implements IRenderable, GUIContainerProvider, InputH
         container.render(context);
     }
 
-
     @Override
     public IGUIArea getArea() {
-        return new TransformedArea(this.localTransform.getGlobalTransform(), this.localArea);
+        return new TransformedArea(this.transform.getGlobalTransform(), this.localArea);
     }
 
 
     @Override
     public void render(GuiGraphics context) {
-        new TransformedElement(this::renderWithoutTransform, localTransform).render(context);
+        new TransformedElement(this::renderWithoutTransform, transform).render(context);
     }
 
     @Override
     public void remove() {
         container.remove();
-        inputHandler.remove();
+        eventHandler.remove();
         if (parent != null) {
             parent.container.removeRenderable(this);
-            parent.inputHandler.removeListener(inputHandler);
+            parent.eventHandler.removeListener(eventHandler);
         }
+    }
+
+    @Override
+    public EventHandler getEventHandler() {
+        return eventHandler;
     }
 
     public static class Builder {
         BaseGUIElement element = new BaseGUIElement();
 
         public Builder trasform(Transform2D transform) {
-            element.localTransform = new InheritableTransform2D(transform, element.localTransform.parent);
+            element.transform = new InheritableTransform2D(transform, element.transform.parent);
             return this;
         }
 
-        public Builder position(Vec2 pos) {
-            element.localTransform.pos = pos;
-            return this;
-        }
-
-        public Builder cursorPosSupplier(Supplier<Vec2> supplier) {
-            element.cursorPosSupplier = supplier;
+        public Builder position(Vector2d pos) {
+            element.transform.pos = pos;
             return this;
         }
 
@@ -153,7 +155,7 @@ public class BaseGUIElement implements IRenderable, GUIContainerProvider, InputH
         }
 
         public Builder parent(Transform2D transform2D) {
-            element.localTransform.parent = transform2D;
+            element.transform.parent = transform2D;
             return this;
         }
 

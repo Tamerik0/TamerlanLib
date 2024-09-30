@@ -1,8 +1,8 @@
 package org.tamerlan.tamerlanlib.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.world.phys.Vec2;
+import org.joml.Vector2d;
 
 public interface IRenderableWithScale {
-    void renderWithScale(GuiGraphics context, Vec2 scale);
+    void renderWithScale(GuiGraphics context, Vector2d scale);
 }
